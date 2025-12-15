@@ -45,13 +45,30 @@ public class LetterService {
     public LetterSendResponse sendLetter(LetterSendRequest request) {
         User sender = userRepository.findById(request.senderId())
                 .orElseThrow(() -> new EntityNotFoundException("발신자 ID를 찾을 수 없습니다: " + request.senderId()));
-        User receiver = userRepository.findByNickname(request.receiverNickname())
-                .orElseThrow(() -> new EntityNotFoundException("수신자 ID를 찾을 수 없습니다: " + request.receiverNickname()));
+        User receiver = userRepository.findById(request.receiverId())
+                .orElseThrow(() -> new EntityNotFoundException("수신자 ID를 찾을 수 없습니다: " + request.receiverId()));
 
         LetterTheme theme = null;
-        if (request.theme() != null) {
-            Optional<LetterTheme> themeOptional = letterThemeRepository.findByCode(request.theme());
-            theme = themeOptional.orElse(null);
+        String requestedThemeCode = request.theme();
+        String warningMessage = null;
+
+        if (requestedThemeCode != null) {
+            Optional<LetterTheme> themeOptional = letterThemeRepository.findByCode(requestedThemeCode);
+
+            if (themeOptional.isEmpty()) {
+                warningMessage = String.format("요청하신 테마 코드 '%s'를 찾을 수 없어 'DEFAULT' 테마로 대체하여 저장됩니다.", requestedThemeCode);
+                requestedThemeCode = "DEFAULT";
+            } else {
+                theme = themeOptional.get();
+            }
+        } else {
+            warningMessage = "테마를 지정하지 않아 'DEFAULT' 테마로 저장됩니다.";
+            requestedThemeCode = "DEFAULT";
+        }
+
+        if (theme == null && "DEFAULT".equals(requestedThemeCode)) {
+            theme = letterThemeRepository.findByCode(requestedThemeCode)
+                    .orElseThrow(() -> new EntityNotFoundException("기본 테마(DEFAULT)를 찾을 수 없습니다. DB를 확인해주세요."));
         }
 
         Letter letter = Letter.builder()
@@ -69,7 +86,8 @@ public class LetterService {
                 savedLetter.getSender().getNickname(),
                 savedLetter.getReceiver().getNickname(),
                 savedLetter.getCreatedAt(),
-                "편지가 성공적으로 예약 또는 발송되었습니다."
+                "편지가 성공적으로 예약 또는 발송되었습니다.",
+                warningMessage
         );
     }
 

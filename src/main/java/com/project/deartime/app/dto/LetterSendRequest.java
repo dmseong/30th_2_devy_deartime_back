@@ -1,6 +1,7 @@
 package com.project.deartime.app.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
@@ -8,8 +9,8 @@ import java.time.LocalDateTime;
 public record LetterSendRequest(
         Long senderId,
 
-        @NotBlank(message = "수신자 닉네임은 필수입니다.")
-        String receiverNickname,
+        @NotNull(message = "수신자 ID는 필수입니다.")
+        Long receiverId,
 
         String theme,
 

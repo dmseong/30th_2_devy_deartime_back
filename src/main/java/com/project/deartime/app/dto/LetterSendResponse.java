@@ -7,6 +7,7 @@ public record LetterSendResponse(
         String senderNickname,
         String receiverNickname,
         LocalDateTime sentAt,
-        String message
+        String message,
+        String warningMessage
 ) {
 }

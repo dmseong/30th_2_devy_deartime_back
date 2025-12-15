@@ -48,7 +48,7 @@ public class LetterController {
 
         LetterSendRequest finalRequest = new LetterSendRequest(
                 senderId,
-                request.receiverNickname(),
+                request.receiverId(),
                 request.theme(),
                 request.title(),
                 request.content(),
