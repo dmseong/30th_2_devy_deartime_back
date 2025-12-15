@@ -30,6 +30,7 @@ public enum ErrorCode {
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     DB_CONSTRAINT_VIOLATION_EXCEPTION(HttpStatus.BAD_REQUEST, "요청 값이 데이터베이스 제약 조건을 위반했습니다."),
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "유효하지 않은 입력 값입니다."),
+    INVALID_JSON_FORMAT(HttpStatus.BAD_REQUEST,"요청 형식이 잘못되었습니다. 데이터 타입을 확인해주세요."),
 
     // 401 Unauthorized
     UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자거나 인증과정에 오류가 있습니다. "),

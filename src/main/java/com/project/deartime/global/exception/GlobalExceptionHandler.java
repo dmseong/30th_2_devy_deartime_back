@@ -1,5 +1,6 @@
 package com.project.deartime.global.exception;
 
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.project.deartime.global.dto.ApiResponseTemplete;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -49,10 +50,32 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponseTemplete<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        if (e.getMessage().contains("Unknown status")) {
-            return ApiResponseTemplete.error(ErrorCode.INVALID_ENUM_VALUE, "Invalid status value provided: " + extractInvalidStatus(e));
+
+        ErrorCode errorCode = ErrorCode.INVALID_JSON_FORMAT;
+        String detailMessage = errorCode.getMessage();
+
+        if (e.getCause() instanceof MismatchedInputException mismatch) {
+
+            if (mismatch.getTargetType() != null && mismatch.getTargetType().isEnum()) {
+                detailMessage = String.format("유효하지 않은 Enum 값입니다. 필드: %s, 예상 타입: %s",
+                        mismatch.getPath().get(mismatch.getPath().size() - 1).getFieldName(),
+                        mismatch.getTargetType().getSimpleName());
+
+            } else if (mismatch.getTargetType() != null) {
+                String fieldName = mismatch.getPath().get(mismatch.getPath().size() - 1).getFieldName();
+                String targetType = mismatch.getTargetType().getSimpleName();
+
+                detailMessage = String.format("요청 필드 '%s'의 타입이 잘못되었습니다. 예상 타입: %s",
+                        fieldName,
+                        targetType);
+            } else {
+                detailMessage = "JSON 구조 또는 타입이 잘못되었습니다. 요청 본문을 확인해주세요.";
+            }
+        } else {
+            detailMessage = "요청 본문을 읽을 수 없습니다. JSON 형식이 올바른지 확인해주세요.";
         }
-        return ApiResponseTemplete.error(ErrorCode.INVALID_REQUEST, "Malformed request: " + e.getMessage());
+
+        return ApiResponseTemplete.error(errorCode, detailMessage);
     }
 
     private String extractInvalidStatus(HttpMessageNotReadableException e) {
