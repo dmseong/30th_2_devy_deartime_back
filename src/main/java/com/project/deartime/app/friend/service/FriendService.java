@@ -28,6 +28,38 @@ public class FriendService {
     private final ProxyRepository proxyRepository;
 
     /**
+     * 내 친구 목록 조회 (accepted 상태만)
+     */
+    public List<FriendResponseDto> getMyFriends(Long userId) {
+        // userId가 user 또는 friend에 포함되고, status가 accepted인 관계 찾기
+        List<Friend> friendships = friendRepository.findAcceptedFriendsByUserId(userId);
+
+        List<FriendResponseDto> friendList = new ArrayList<>();
+
+        for (Friend friendship : friendships) {
+            // 내가 user인 경우 -> friend 정보를 반환
+            // 내가 friend인 경우 -> user 정보를 반환
+            User friendUser = friendship.getUser().getId().equals(userId)
+                    ? friendship.getFriend()
+                    : friendship.getUser();
+
+            FriendResponseDto dto = FriendResponseDto.builder()
+                    .userId(friendship.getUser().getId())
+                    .friendId(friendship.getFriend().getId())
+                    .friendNickname(friendUser.getNickname())
+                    .friendProfileImageUrl(friendUser.getProfileImageUrl())
+                    .friendBio(friendUser.getBio())
+                    .status(friendship.getStatus())
+                    .requestedAt(friendship.getRequestedAt())
+                    .build();
+
+            friendList.add(dto);
+        }
+
+        return friendList;
+    }
+
+    /**
      * 닉네임으로 친구 검색
      */
     public List<FriendSearchResponse> searchFriendsByNickname(Long currentUserId, String keyword) {

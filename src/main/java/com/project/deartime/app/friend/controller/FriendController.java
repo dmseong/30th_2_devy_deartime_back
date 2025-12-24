@@ -20,6 +20,41 @@ public class FriendController {
     private final FriendService friendService;
 
     /**
+     * 내 친구 목록 조회
+     * GET /api/friends
+     */
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getMyFriends(
+            @AuthenticationPrincipal String userId
+    ) {
+        System.out.println("=== 친구 목록 조회 ===");
+        System.out.println("userId: " + userId);
+
+        try {
+            List<FriendResponseDto> friends =
+                    friendService.getMyFriends(Long.parseLong(userId));
+
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("status", 200);
+            responseBody.put("message", "친구 목록 조회 성공");
+            responseBody.put("count", friends.size());
+            responseBody.put("data", friends);
+
+            return ResponseEntity.ok(responseBody);
+
+        } catch (Exception e) {
+            System.out.println("❌ 서버 오류: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", 500);
+            errorResponse.put("message", "서버 오류가 발생했습니다.");
+
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    /**
      * 친구 닉네임 검색
      * GET /api/friends/search?keyword={닉네임}
      */
