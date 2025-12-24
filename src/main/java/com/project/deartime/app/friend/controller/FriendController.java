@@ -1,7 +1,10 @@
 package com.project.deartime.app.friend.controller;
 
+import com.project.deartime.app.friend.dto.FriendRequestDto;
+import com.project.deartime.app.friend.dto.FriendResponseDto;
 import com.project.deartime.app.friend.dto.FriendSearchResponse;
 import com.project.deartime.app.friend.service.FriendService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,7 +34,6 @@ public class FriendController {
         System.out.println("userId: " + userId);
         System.out.println("keyword: " + keyword);
 
-        // 검색어가 비어있는 경우 처리
         if (keyword == null || keyword.trim().isEmpty()) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("status", 400);
@@ -49,5 +51,49 @@ public class FriendController {
         responseBody.put("results", searchResults);
 
         return ResponseEntity.ok(responseBody);
+    }
+
+    /**
+     * 친구 추가 요청
+     * POST /api/friends
+     */
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> sendFriendRequest(
+            @AuthenticationPrincipal String userId,
+            @RequestBody @Valid FriendRequestDto request
+    ) {
+        System.out.println("=== 친구 추가 요청 ===");
+        System.out.println("userId: " + userId);
+        System.out.println("friendId: " + request.getFriendId());
+
+        try {
+            FriendResponseDto friendResponse =
+                    friendService.sendFriendRequest(Long.parseLong(userId), request.getFriendId());
+
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("status", 200);
+            responseBody.put("message", "친구 요청 성공");
+            responseBody.put("data", friendResponse);
+
+            return ResponseEntity.ok(responseBody);
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ 친구 요청 실패: " + e.getMessage());
+
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", 400);
+            errorResponse.put("message", e.getMessage());
+
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            System.out.println("❌ 서버 오류: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", 500);
+            errorResponse.put("message", "서버 오류가 발생했습니다.");
+
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
     }
 }
