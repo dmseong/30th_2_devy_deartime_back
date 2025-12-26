@@ -44,9 +44,7 @@ public class User extends BaseTimeEntity {
        회원가입 완료 여부 판단
      ========================= */
     public boolean isRegistered() {
-        return nickname != null
-                && birthDate != null
-                && profileImageUrl != null;
+        return nickname != null;
     }
 
     /* =========================

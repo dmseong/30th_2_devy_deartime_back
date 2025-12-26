@@ -12,11 +12,10 @@ public class SignUpRequest {
     @NotBlank
     private String nickname;
 
-    @NotNull
     private LocalDate birthDate;
 
     private String bio;
 
-    @NotBlank
+    // profileImageUrl은 선택 사항으로 변경
     private String profileImageUrl;
 }
