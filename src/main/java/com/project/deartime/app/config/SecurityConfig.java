@@ -37,10 +37,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 인증 없이 접근 가능한 경로
                         .requestMatchers(
-                                "/api/auth/**",
+                                "/api/auth/google",
+                                "/api/users/signup",
                                 "/login/oauth2/code/**",
                                 "/oauth2/**"
                         ).permitAll()
+                        .requestMatchers("/api/auth/logout").authenticated()
                         // 회원가입은 임시 토큰으로 접근
                         .requestMatchers("/api/users/signup").permitAll()
                         // 인증이 필요한 경로
@@ -54,6 +56,7 @@ public class SecurityConfig {
                         ).authenticated()
                         .anyRequest().authenticated()
                 )
+
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
