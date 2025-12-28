@@ -2,7 +2,6 @@ package com.project.deartime.global.exception;
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.project.deartime.global.dto.ApiResponseTemplete;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -32,11 +31,6 @@ public class GlobalExceptionHandler {
                 errorCode,
                 errorMessage
         );
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ApiResponseTemplete<String>> handleEntityNotFoundException(EntityNotFoundException e) {
-        return ApiResponseTemplete.error(ErrorCode.NOT_FOUND_ID_EXCEPTION, e.getMessage());
     }
 
     @ExceptionHandler(AccessDeniedException.class)

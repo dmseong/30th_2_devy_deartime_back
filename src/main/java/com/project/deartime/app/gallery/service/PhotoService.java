@@ -10,8 +10,10 @@ import com.project.deartime.app.gallery.repository.PhotoRepository;
 
 import com.project.deartime.app.service.S3Service;
 import com.project.deartime.global.dto.PageResponse;
-import jakarta.persistence.EntityNotFoundException;
+import com.project.deartime.global.exception.CoreApiException;
+import com.project.deartime.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class PhotoService {
 
     private final PhotoRepository photoRepository;
@@ -49,14 +52,16 @@ public class PhotoService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
-                        new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId)
+                        new CoreApiException(ErrorCode.NOT_FOUND_ID_EXCEPTION,
+                                "사용자를 찾을 수 없습니다. userId=" + userId)
                 );
 
         Album targetAlbum = null;
         if (request.albumId() != null) {
             targetAlbum = albumRepository.findById(request.albumId())
                     .orElseThrow(() ->
-                            new EntityNotFoundException("앨범을 찾을 수 없습니다. ID: " + request.albumId())
+                            new CoreApiException(ErrorCode.RESOURCE_NOT_FOUND,
+                                    "앨범을 찾을 수 없습니다. userId=" + request.albumId())
                     );
 
             if (!targetAlbum.getUser().getId().equals(userId)) {
@@ -127,7 +132,8 @@ public class PhotoService {
      */
     public PhotoDetailResponse updatePhotoCaption(Long userId, Long photoId, PhotoCaptionUpdateRequest request) {
         Photo photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new EntityNotFoundException("사진을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CoreApiException(ErrorCode.RESOURCE_NOT_FOUND,
+                        "사진을 찾을 수 없습니다. photoId=" + photoId));
 
         if (!photo.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("캡션 수정 권한이 없습니다.");
@@ -142,7 +148,8 @@ public class PhotoService {
      */
     public void deletePhoto(Long userId, Long photoId) {
         Photo photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new EntityNotFoundException("사진을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CoreApiException(ErrorCode.RESOURCE_NOT_FOUND,
+                        "사진을 찾을 수 없습니다. photoId=" + photoId));
 
         if (!photo.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("사진 삭제 권한이 없습니다.");
@@ -166,13 +173,15 @@ public class PhotoService {
      */
     public AlbumDetailResponse createAlbum(Long userId, AlbumCreateRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CoreApiException(ErrorCode.NOT_FOUND_ID_EXCEPTION,
+                        "사용자를 찾을 수 없습니다. userId=" + userId));
 
         Photo coverPhoto = null;
 
         if (request.coverPhotoId() != null) {
             coverPhoto = photoRepository.findById(request.coverPhotoId())
-                    .orElseThrow(() -> new EntityNotFoundException("커버 사진을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new CoreApiException(ErrorCode.RESOURCE_NOT_FOUND,
+                            "커버 사진을 찾을 수 없습니다. photoId=" + request.coverPhotoId()));
 
             if (!coverPhoto.getUser().getId().equals(userId)) {
                 throw new AccessDeniedException("커버 사진 권한이 없습니다.");
@@ -215,7 +224,8 @@ public class PhotoService {
      */
     public AlbumDetailResponse updateAlbumTitle(Long userId, Long albumId, AlbumTitleUpdateRequest request) {
         Album album = albumRepository.findById(albumId)
-                .orElseThrow(() -> new EntityNotFoundException("앨범을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CoreApiException(ErrorCode.RESOURCE_NOT_FOUND,
+                        "앨범을 찾을 수 없습니다. albumId=" + albumId));
 
         if (!album.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("앨범 수정 권한이 없습니다.");
@@ -230,7 +240,8 @@ public class PhotoService {
      */
     public void deleteAlbum(Long userId, Long albumId) {
         Album album = albumRepository.findById(albumId)
-                .orElseThrow(() -> new EntityNotFoundException("앨범을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CoreApiException(ErrorCode.RESOURCE_NOT_FOUND,
+                        "앨범을 찾을 수 없습니다. albumId=" + albumId));
 
         if (!album.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("앨범 삭제 권한이 없습니다.");
@@ -245,7 +256,8 @@ public class PhotoService {
      */
     public List<AlbumPhotoResponse> addPhotosToAlbum(Long userId, Long albumId, AlbumPhotoRequest request) {
         Album album = albumRepository.findById(albumId)
-                .orElseThrow(() -> new EntityNotFoundException("앨범을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CoreApiException(ErrorCode.RESOURCE_NOT_FOUND,
+                        "앨범을 찾을 수 없습니다. albumId=" + albumId));
 
         if (!album.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("사진 추가 권한이 없습니다.");
@@ -255,7 +267,8 @@ public class PhotoService {
 
         for (Long photoId : request.photoIds()) {
             Photo photo = photoRepository.findById(photoId)
-                    .orElseThrow(() -> new EntityNotFoundException("사진을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new CoreApiException(ErrorCode.RESOURCE_NOT_FOUND,
+                            "사진을 찾을 수 없습니다. photoId=" + photoId));
 
             if (!photo.getUser().getId().equals(userId)) {
                 throw new AccessDeniedException("본인 사진만 추가할 수 있습니다.");
@@ -283,7 +296,8 @@ public class PhotoService {
     @Transactional(readOnly = true)
     public PageResponse<PhotoListResponse> getPhotosInAlbum(Long userId, Long albumId, Pageable pageable) {
         Album album = albumRepository.findById(albumId)
-                .orElseThrow(() -> new EntityNotFoundException("앨범을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CoreApiException(ErrorCode.RESOURCE_NOT_FOUND,
+                        "앨범을 찾을 수 없습니다. albumId=" + albumId));
 
         if (!album.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("조회 권한이 없습니다.");
@@ -301,7 +315,8 @@ public class PhotoService {
     public void removePhotoFromAlbum(Long userId, Long albumId, Long photoId) {
         AlbumPhoto albumPhoto = albumPhotoRepository
                 .findByAlbumIdAndPhotoId(albumId, photoId)
-                .orElseThrow(() -> new EntityNotFoundException("앨범에 해당 사진이 없습니다."));
+                .orElseThrow(() -> new CoreApiException(ErrorCode.RESOURCE_NOT_FOUND,
+                        "앨범에 해당 사진이 없습니다. albumId=" + albumId + ", photoId=" + photoId));
 
         if (!albumPhoto.getAlbum().getUser().getId().equals(userId)) {
             throw new AccessDeniedException("제거 권한이 없습니다.");
