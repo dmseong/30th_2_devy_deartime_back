@@ -15,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/letters")
 @RequiredArgsConstructor
@@ -24,20 +22,13 @@ public class LetterController {
 
     private final LetterService letterService;
 
-    private Long getCurrentUserId(Long principalId) {
-        if (principalId == null) {
-            throw new RuntimeException("인증된 사용자 정보를 찾을 수 없습니다.");
-        }
-        return principalId;
-    }
-
     // 편지 전송
     @PostMapping
     public ResponseEntity<ApiResponseTemplete<LetterSendResponse>> sendLetter(
             @RequestBody @Valid LetterSendRequest request,
-            @AuthenticationPrincipal Long principalId
+            @AuthenticationPrincipal String userId
             ) {
-        Long senderId = getCurrentUserId(principalId);
+        Long senderId = Long.parseLong(userId);
 
         LetterSendRequest finalRequest = new LetterSendRequest(
                 senderId,
@@ -56,11 +47,11 @@ public class LetterController {
     // 받은 편지 모아보기
     @GetMapping("/received")
     public ResponseEntity<ApiResponseTemplete<PageResponse<LetterListResponse>>> getReceivedLetters(
-            @AuthenticationPrincipal Long principalId,
+            @AuthenticationPrincipal String userId,
             @PageableDefault(size = 8, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Long userId = getCurrentUserId(principalId);
-        PageResponse<LetterListResponse> response = letterService.getReceivedLetters(userId, pageable);
+        Long myId = Long.parseLong(userId);
+        PageResponse<LetterListResponse> response = letterService.getReceivedLetters(myId, pageable);
 
         SuccessCode successCode = response.totalElements() == 0
                 ? SuccessCode.GET_LETTER_EMPTY
@@ -72,11 +63,11 @@ public class LetterController {
     // 보낸 편지 모아보기
     @GetMapping("/sent")
     public ResponseEntity<ApiResponseTemplete<PageResponse<LetterListResponse>>> getSentLetter(
-            @AuthenticationPrincipal Long principalId,
+            @AuthenticationPrincipal String userId,
             @PageableDefault(size = 8, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Long userId = getCurrentUserId(principalId);
-        PageResponse<LetterListResponse> response = letterService.getSentLetters(userId, pageable);
+        Long myId = Long.parseLong(userId);
+        PageResponse<LetterListResponse> response = letterService.getSentLetters(myId, pageable);
 
         SuccessCode successCode = response.totalElements() == 0
                 ? SuccessCode.GET_LETTER_EMPTY
@@ -88,11 +79,11 @@ public class LetterController {
     // 즐겨찾기 한 편지 모아보기
     @GetMapping("/bookmarked")
     public ResponseEntity<ApiResponseTemplete<PageResponse<LetterListResponse>>> getBookmarkedLetters(
-            @AuthenticationPrincipal Long principalId,
+            @AuthenticationPrincipal String userId,
             @PageableDefault(size = 8, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Long userId = getCurrentUserId(principalId);
-        PageResponse<LetterListResponse> response = letterService.getBookmarkedLetters(userId, pageable);
+        Long myId = Long.parseLong(userId);
+        PageResponse<LetterListResponse> response = letterService.getBookmarkedLetters(myId, pageable);
 
         SuccessCode successCode = response.totalElements() == 0
                 ? SuccessCode.GET_LETTER_EMPTY
@@ -104,12 +95,12 @@ public class LetterController {
     // 우리의 우체통
     @GetMapping("/conversation/{targetId}")
     public ResponseEntity<ApiResponseTemplete<PageResponse<LetterListResponse>>> getConversationLetters(
-            @AuthenticationPrincipal Long principalId,
+            @AuthenticationPrincipal String userId,
             @PathVariable Long targetId,
             @PageableDefault(size = 8, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Long userId = getCurrentUserId(principalId);
-        PageResponse<LetterListResponse> response = letterService.getConversationLetters(userId, targetId, pageable);
+        Long myId = Long.parseLong(userId);
+        PageResponse<LetterListResponse> response = letterService.getConversationLetters(myId, targetId, pageable);
 
         SuccessCode successCode = response.data().isEmpty()
                 ? SuccessCode.CONVERSATION_EMPTY
@@ -125,10 +116,10 @@ public class LetterController {
     @GetMapping("/{letterId}")
     public ResponseEntity<ApiResponseTemplete<LetterDetailResponse>> getLetterDetail(
             @PathVariable Long letterId,
-            @AuthenticationPrincipal Long principalId
+            @AuthenticationPrincipal String userId
     ) {
-        Long userId = getCurrentUserId(principalId);
-        LetterDetailResponse response = letterService.getLetterDetail(letterId, userId);
+        Long myId = Long.parseLong(userId);
+        LetterDetailResponse response = letterService.getLetterDetail(letterId, myId);
 
         return ApiResponseTemplete.success(SuccessCode.GET_LETTER_SUCCESS, response);
     }
@@ -137,10 +128,10 @@ public class LetterController {
     @PutMapping("/{letterId}/bookmark")
     public ResponseEntity<ApiResponseTemplete<String>> toggleBookmark(
             @PathVariable Long letterId,
-            @AuthenticationPrincipal Long principalId
+            @AuthenticationPrincipal String userId
     ) {
-        Long userId = getCurrentUserId(principalId);
-        boolean isBookmarked = letterService.toggleBookmark(letterId, userId);
+        Long myId = Long.parseLong(userId);
+        boolean isBookmarked = letterService.toggleBookmark(letterId, myId);
 
         String message = isBookmarked ? "편지가 즐겨찾기에 추가되었습니다." : "편지가 즐겨찾기에서 제거되었습니다.";
 
@@ -150,11 +141,11 @@ public class LetterController {
     @DeleteMapping("/{letterId}")
     public ResponseEntity<ApiResponseTemplete<String>> deleteLetter(
             @PathVariable Long letterId,
-            @AuthenticationPrincipal Long principalId
+            @AuthenticationPrincipal String userId
     ) {
-        Long userId = getCurrentUserId(principalId);
+        Long myId = Long.parseLong(userId);
 
-        letterService.softDeleteOrPermanentlyDelete(letterId, userId);
+        letterService.softDeleteOrPermanentlyDelete(letterId, myId);
 
         return ApiResponseTemplete.success(
                 SuccessCode.DELETE_LETTER_SUCCESS,
