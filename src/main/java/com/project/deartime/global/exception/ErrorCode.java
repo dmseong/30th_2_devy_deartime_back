@@ -56,7 +56,7 @@ public enum ErrorCode {
     AUTHENTICATION_FAILED_EXCEPTION(HttpStatus.FORBIDDEN, "인증에 실패했습니다. "),
 
     // 404 NOT FOUND
-    NOT_FOUND_ID_EXCEPTION(HttpStatus.NOT_FOUND, "찾을 수 없는 ID"),
+    NOT_FOUND_ID_EXCEPTION(HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다."),
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
     FRIEND_NOT_FOUND(HttpStatus.NOT_FOUND, "친구를 찾을 수 없습니다."),
@@ -81,7 +81,8 @@ public enum ErrorCode {
     // letter
     LETTER_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 편지에 접근하거나 조작할 권한이 없습니다."),
     LETTER_NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 편지를 찾을 수 없습니다."),
-    LETTER_THEME_NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 편지 테마를 찾을 수 없습니다.")
+    LETTER_THEME_NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 편지 테마를 찾을 수 없습니다."),
+    LETTER_DEFAULT_NOT_FOUND(HttpStatus.NOT_FOUND, "기본 테마(DEFAULT)를 찾을 수 없습니다. DB를 확인해주세요.")
     ;
 
     private final HttpStatus httpStatus;
