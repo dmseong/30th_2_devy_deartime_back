@@ -114,7 +114,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponseTemplete<String>> handleMediaTypeNotSupported(
             HttpMediaTypeNotSupportedException e
     ) {
-        return ApiResponseTemplete.error(ErrorCode.HttpMediaTypeNotSupportedException, e.getMessage());
+        return ApiResponseTemplete.error(ErrorCode.NOT_SUPPORT_MEDIA_TYPE, e.getMessage());
     }
 
     // 최종 Fallback 예외 처리
