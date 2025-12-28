@@ -1,4 +1,4 @@
-package com.project.deartime.app.dto.photos;
+package com.project.deartime.app.gallery.dto.photos;
 
 import com.project.deartime.app.domain.Photo;
 import com.project.deartime.app.domain.AlbumPhoto;

@@ -1,4 +1,4 @@
-package com.project.deartime.app.dto.photos;
+package com.project.deartime.app.gallery.dto.photos;
 
 public record PhotoUploadRequest (
         String caption,

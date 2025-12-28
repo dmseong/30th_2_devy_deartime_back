@@ -1,13 +1,14 @@
-package com.project.deartime.app.service;
+package com.project.deartime.app.gallery.service;
 
 import com.project.deartime.app.auth.repository.UserRepository;
 import com.project.deartime.app.domain.*;
-import com.project.deartime.app.dto.albums.*;
-import com.project.deartime.app.dto.photos.*;
-import com.project.deartime.app.repository.AlbumPhotoRepository;
-import com.project.deartime.app.repository.AlbumRepository;
-import com.project.deartime.app.repository.PhotoRepository;
+import com.project.deartime.app.gallery.dto.albums.*;
+import com.project.deartime.app.gallery.dto.photos.*;
+import com.project.deartime.app.gallery.repository.AlbumPhotoRepository;
+import com.project.deartime.app.gallery.repository.AlbumRepository;
+import com.project.deartime.app.gallery.repository.PhotoRepository;
 
+import com.project.deartime.app.service.S3Service;
 import com.project.deartime.global.dto.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

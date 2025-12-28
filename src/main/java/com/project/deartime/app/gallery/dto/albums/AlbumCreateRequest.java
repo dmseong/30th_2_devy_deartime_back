@@ -1,4 +1,4 @@
-package com.project.deartime.app.dto.albums;
+package com.project.deartime.app.gallery.dto.albums;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

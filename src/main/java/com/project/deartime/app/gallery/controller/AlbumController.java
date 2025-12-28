@@ -1,8 +1,11 @@
-package com.project.deartime.app.controller;
+package com.project.deartime.app.gallery.controller;
 
-import com.project.deartime.app.dto.albums.*;
-import com.project.deartime.app.dto.photos.PhotoListResponse;
-import com.project.deartime.app.service.PhotoService;
+import com.project.deartime.app.gallery.dto.albums.AlbumCreateRequest;
+import com.project.deartime.app.gallery.dto.albums.AlbumDetailResponse;
+import com.project.deartime.app.gallery.dto.albums.AlbumListResponse;
+import com.project.deartime.app.gallery.dto.albums.AlbumTitleUpdateRequest;
+import com.project.deartime.app.gallery.dto.photos.PhotoListResponse;
+import com.project.deartime.app.gallery.service.PhotoService;
 import com.project.deartime.global.dto.ApiResponseTemplete;
 import com.project.deartime.global.dto.PageResponse;
 import com.project.deartime.global.exception.SuccessCode;

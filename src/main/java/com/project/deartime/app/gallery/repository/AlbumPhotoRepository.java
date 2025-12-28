@@ -1,4 +1,4 @@
-package com.project.deartime.app.repository;
+package com.project.deartime.app.gallery.repository;
 
 import com.project.deartime.app.domain.AlbumPhoto;
 import com.project.deartime.app.domain.AlbumPhotoId;
