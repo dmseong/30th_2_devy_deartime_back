@@ -48,7 +48,7 @@ public class TimeCapsuleService {
     public CapsuleResponse createCapsule(Long senderId, CreateCapsuleRequest request, MultipartFile imageFile, User senderUser) {
         // 받는 사람이 존재하는지 확인
         if (senderId.equals(request.getReceiverId())) {
-            throw new CoreApiException(ErrorCode.FRIEND_SELF_REQUEST, "자신에게 캡슐을 보낼 수 없습니다.");
+            throw new CoreApiException(ErrorCode.CAPSULE_SELF_SEND);
         }
 
         // 친구 관계 확인
@@ -146,18 +146,20 @@ public class TimeCapsuleService {
         TimeCapsule capsule = timeCapsuleRepository.findById(capsuleId)
                 .orElseThrow(() -> new CoreApiException(ErrorCode.CAPSULE_NOT_FOUND));
 
-        // 접근 권한 확인
-        boolean canAccess = canAccessCapsule(userId, capsule);
-
-        // 아직 열어볼 수 없는 경우 예외 발생
-        if (!canAccess && LocalDateTime.now().isBefore(capsule.getOpenAt())) {
-            throw new CoreApiException(ErrorCode.CAPSULE_NOT_OPENED);
-        }
-
-        // 접근 권한이 없는 경우 예외 발생
+        // 1. 접근 권한이 없는 경우 예외 발생 (관계 확인 먼저)
         if (!isUserRelatedToCapsule(userId, capsule)) {
             throw new CoreApiException(ErrorCode.CAPSULE_ACCESS_DENIED);
         }
+
+        // 2. 받는 사람이고 아직 열어볼 수 없는 경우 예외 발생
+        boolean isReceiver = capsule.getReceiver().getId().equals(userId);
+        boolean isNotOpened = LocalDateTime.now().isBefore(capsule.getOpenAt());
+        if (isReceiver && isNotOpened) {
+            throw new CoreApiException(ErrorCode.CAPSULE_NOT_OPENED);
+        }
+
+        // 3. 최종 접근 권한 확인
+        boolean canAccess = canAccessCapsule(userId, capsule);
 
         return CapsuleResponse.from(capsule, canAccess);
     }
